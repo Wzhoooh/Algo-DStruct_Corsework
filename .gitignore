@@ -1,4 +1,6 @@
 *.exe
 *.vscode
 TODO
-sets_sys.hpp
+input.txt
+output.txt
+*.doc*

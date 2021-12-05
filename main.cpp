@@ -1,5 +1,7 @@
 #include <string>
 #include "tim_sort.hpp"
+#include "avl_tree.hpp"
+#include "sets_sys.hpp"
 
 typedef unsigned int value_type;
 
@@ -80,8 +82,42 @@ int main()
         }
         graph.emplace_back(std::move(from), std::move(to), weight);
     }
-    std::cout << graph;
+    // std::cout << graph << "\n";
     // sort edges
-    timSort(graph.begin(), graph.end());
-    std::cout << graph;
+    auto graphSorted(graph);
+    timSort(graphSorted.begin(), graphSorted.end());
+    // std::cout << graphSorted << "\n";
+
+    // get array of names of tops
+    AVLTree<std::string> names;   
+    for (int i = 0; i < graphSorted.size(); i++)
+    {
+        names.insert(graphSorted[i].from);
+        names.insert(graphSorted[i].to);
+    }
+    DynArr<std::string> tops;
+    for (AVLTree<std::string>::left_root_right_iterator i = names.begin(); i != names.end(); i++)
+        tops.push_back(*i);
+
+    // std::cout << "tops: " << tops << "\n";
+    SetsSys setsSys(std::move(tops));
+    DynArr<Edge> treeTops;
+    for (int i = 0; i < graphSorted.size(); i++)
+    {
+        if (setsSys.findSet(graphSorted[i].from) != setsSys.findSet(graphSorted[i].to))
+        {
+            // not cycle, adding this edge to tree
+            treeTops.push_back(graphSorted[i]);
+            setsSys.unionSets(graphSorted[i].from, graphSorted[i].to);
+        }
+    }
+    
+    // print output
+    unsigned int weightSum = 0;
+    for (int i = 0; i < treeTops.size(); i++)
+    {
+        std::cout << treeTops[i].from << " " << treeTops[i].to << "\n";
+        weightSum += treeTops[i].weight;
+    }
+    std::cout << weightSum;
 }
